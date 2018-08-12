@@ -19,10 +19,9 @@ char c_buffer[10];
 int8_t i_test;
 int8_t i_temperatur;
 int8_t i_temperatur_comma;
-float f_temperatur;
 int8_t i_buffer_I2C_0;
 int8_t i_buffer_I2C_1;
-int8_t i_buffer_I2C_2;
+
 
 
 int main(void)
@@ -45,27 +44,13 @@ int main(void)
 		lcd_string(c_buffer);
 
 
-//
-//	 	_delay_ms(100);
-//
-//
-//
-//		_delay_ms(50);
-
-
-
-
+		// I2C Übertragung
 		ret = i2c_start(LM75_ADDRESS+I2C_READ);
 		if (ret){
-
 			i2c_stop();
-
 
 			lcd_setcursor(0,1);
 			lcd_string("Fehler I2C");
-
-//			lcd_setcursor(0,4);
-//			lcd_string("               ");
 
 		}
 		else{
@@ -85,9 +70,8 @@ int main(void)
 			else{
 				i_temperatur_comma = 0;
 			}
+		} // Ende I2C übertragung
 
-
-		}
 
 		itoa( i_temperatur, c_buffer, 10);
 		if(i_temperatur_comma==5){
@@ -96,11 +80,9 @@ int main(void)
 		else{
 			strcat(c_buffer,",0");
 		}
-
-
 		lcd_setcursor(0,4);
 		lcd_string(c_buffer);
-
+		lcd_string("°C");
 
 	    PORTD &= ~(1<<PD5); 	// LED1 Off
 	    _delay_ms(100);
