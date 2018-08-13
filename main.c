@@ -4,11 +4,12 @@
  *  Created on: 24.06.2018
  *      Author: User
  */
-// #define F_CPU 4000000 // CPU Clock
+#define F_CPU 4000000 // CPU Clock
 #define LM75_ADDRESS 0b10010000  // The LM75 is hard wirerd to addres 1001xxx (A2 A1 A0)
 
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>
 #include "lib/i2cmaster.h"
@@ -21,8 +22,13 @@ int8_t i_temperatur;
 int8_t i_temperatur_comma;
 int8_t i_buffer_I2C_0;
 int8_t i_buffer_I2C_1;
+int8_t i_interrupt;
 
-
+//Interrupt Service Routine for INT0
+ISR(INT0_vect)
+{
+	i_interrupt ++;
+}
 
 int main(void)
 {
@@ -31,6 +37,10 @@ int main(void)
 	i2c_init();
     unsigned char ret;
 
+	GICR = 1<<INT0;					// Enable INT0
+	MCUCR = 1<<ISC01 | 1<<ISC00;	// Trigger INT0 on rising edge
+
+	sei();				//Enable Global Interrupt
 
     while (1)
     {
@@ -43,6 +53,10 @@ int main(void)
 		lcd_setcursor(12,1);
 		lcd_string(c_buffer);
 
+
+		itoa( i_interrupt, c_buffer, 10);			// display  test Counter
+		lcd_setcursor(0,2);
+		lcd_string(c_buffer);
 
 		// I2C Übertragung
 		ret = i2c_start(LM75_ADDRESS+I2C_READ);
